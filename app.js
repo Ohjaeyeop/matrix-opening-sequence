@@ -6,27 +6,51 @@ class App {
     this.ctx = this.canvas.getContext('2d');
     document.body.appendChild(this.canvas);
 
+    this.scale = 2;
     window.addEventListener('resize', this.resize.bind(this), false);
     this.resize();
 
-    const words =
-      '独ゃゅノハフこちヱアセシ仕ごにふ8負王ミレ大査ッラね変8エホカ33無24引ちはト288ぽ島主ロミナ秋電7値そ。4確ぼ馬司コヱ問日づクフま引憶相ワヘフエ点81周あべシューリンガンのグーリンダイ。グーリンダイのポンポコピーのポンポコナーの。シューリンガンのタセムリ0赤のひ001。応らたーの想65上文長ソエフヨぽ庁モエリサ本多レえと';
-
-    this.code = [];
     this.n = 0;
-    let startX = 100;
-    while (true) {
-      const createCode = new Code(this.stageHeight, startX, 70, words);
-      this.code[this.n] = createCode;
-      this.n += 1;
-      startX += Math.floor(Math.random() * 80 + 10);
-      console.log(startX);
-      if (startX > this.stageWidth - 100) {
-        break;
+    const words =
+      'ゃゅノハフこちヱアセシ仕ご大"ッ  ラね:8エホカ33引  ちはト28>主ロミナ秋そ49司コ ヱM日づワヘフエ点81Zンガンのグーリンダ  イのポン ポコピーのポン+コナーのシューリンガンのタセムリ:のひ0';
+    this.length = 40;
+    this.xGap = this.stageWidth / this.length;
+    this.code = [];
+    let startX = 0;
+    for (let i = 0; i < this.length; i++) {
+      const order = i === 20 ? 0 : Math.floor(Math.random() * 10 + 1);
+      const startY =
+        order < 6 ? 0 : Math.floor((Math.random() * this.stageHeight) / 2);
+      const len = order < 7 ? 40 : 5;
+      const randomWords = this.createWord(words, len);
+      this.code[i] = new Code(
+        this.stageHeight,
+        startX,
+        startY,
+        randomWords,
+        this.xGap,
+        order,
+      );
+      startX += this.xGap;
+    }
+    requestAnimationFrame(this.animate.bind(this));
+    // let timerId = setInterval(this.animate.bind(this), 50);
+    // setTimeout(() => {
+    //   clearInterval(timerId);
+    // }, 8000);
+  }
+
+  createWord(words, len) {
+    let randomWords = [];
+    for (let i = 0; i < len; i++) {
+      const p = Math.random();
+      if (p < 0.2) {
+        randomWords[i] = '.';
+      } else {
+        randomWords[i] = words[Math.floor(Math.random() * len)];
       }
     }
-
-    window.setInterval(this.animate.bind(this), 50);
+    return randomWords;
   }
 
   resize() {
@@ -35,14 +59,23 @@ class App {
 
     this.canvas.width = this.stageWidth * 2;
     this.canvas.height = this.stageHeight * 2;
-    this.ctx.scale(2, 2);
+
+    this.ctx.scale(this.scale, this.scale);
   }
 
   animate() {
-    this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
-    for (let i = 0; i < this.n; i++) {
-      this.code[i].draw(this.ctx);
+    requestAnimationFrame(this.animate.bind(this));
+    if (this.n > 9) {
+      this.canvas.width = this.stageWidth * 2;
+      this.canvas.height = this.stageHeight * 2;
+      this.scale += 0.01;
+      this.ctx.scale(this.scale, this.scale);
     }
+    this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
+    for (let i = 0; i < this.length; i++) {
+      this.code[i].draw(this.ctx, this.n);
+    }
+    this.n += 0.2;
   }
 }
 
